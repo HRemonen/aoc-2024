@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,11 +26,6 @@ func diff(a, b int) int {
 // 4. with: true (part2), and user input
 // the return value of each run is printed to stdout
 func run(part2 bool, input string) any {
-	// when you're ready to do part 2, remove this "not implemented" block
-	if part2 {
-		return "not implemented"
-	}
-
 	array1 := []string{}
 	array2 := []string{}
 
@@ -54,6 +48,21 @@ func run(part2 bool, input string) any {
 
 		result += diff(val1, val2)
 	}
-	fmt.Println(result)
+
+	if part2 {
+		var result2 int
+		// find out how many time an element from the array1 is in array2
+		for _, v := range array1 {
+			times := 0
+			for _, w := range array2 {
+				if v == w {
+					times++
+				}
+			}
+			val, _ := strconv.Atoi(v)
+			result2 += val * times
+		}
+		return result2
+	}
 	return result
 }
