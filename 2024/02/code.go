@@ -59,6 +59,10 @@ func checkRules(input []string) bool {
 	return true
 }
 
+func removeIndex(s []string, index int) []string {
+	return append(s[:index], s[index+1:]...)
+}
+
 // on code change, run will be executed 4 times:
 // 1. with: false (part1), and example input
 // 2. with: true (part2), and example input
@@ -67,15 +71,31 @@ func checkRules(input []string) bool {
 // the return value of each run is printed to stdout
 func run(part2 bool, input string) any {
 	result := 0
+	unsafeInputs := []string{}
 
 	for _, line := range strings.Split(input, "\n") {
 		if checkRules(strings.Fields(line)) {
 			result++
+		} else {
+			unsafeInputs = append(unsafeInputs, line)
 		}
 	}
 	// when you're ready to do part 2, remove this "not implemented" block
 	if part2 {
-		return "not implemented"
+		result2 := 0
+
+		for _, line := range unsafeInputs {
+			lineSlice := strings.Fields(line)
+			for i := range lineSlice {
+				s := make([]string, len(lineSlice))
+				copy(s, lineSlice)
+				if checkRules(removeIndex(s, i)) {
+					result2++
+					break
+				}
+			}
+		}
+		return result + result2
 	}
 	// solve part 1 here
 	return result
