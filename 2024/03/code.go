@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/jpillora/puzzler/harness/aoc"
 )
@@ -18,6 +19,7 @@ func main() {
 // the return value of each run is printed to stdout
 func run(part2 bool, input string) any {
 	result := 0
+	enabled := true
 	tokenBuilder := ""
 	leftOperand := ""
 	leftSeen := false
@@ -26,7 +28,85 @@ func run(part2 bool, input string) any {
 
 	// when you're ready to do part 2, remove this "not implemented" block
 	if part2 {
-		return "not implemented"
+		for i := 0; i < len(input); i++ {
+			switch input[i] {
+			case 'd':
+				if strings.HasPrefix(input[i:], "do()") {
+					enabled = true
+				} else if strings.HasPrefix(input[i:], "don't()") {
+					enabled = false
+				}
+			case 'm':
+				if len(tokenBuilder) == 0 {
+					tokenBuilder += "m"
+				}
+			case 'u':
+				if tokenBuilder == "m" {
+					tokenBuilder += "u"
+				}
+			case 'l':
+				if tokenBuilder == "mu" {
+					tokenBuilder += "l"
+				}
+			case '(':
+				if tokenBuilder == "mul" {
+					tokenBuilder += "("
+
+					// scan numbers until we hit a ','
+					scannedLen := 0
+					for i++; i < len(input); i++ {
+						if scannedLen == 4 {
+							// revert head to the start if too many characters are scanned
+							i -= 3
+							break
+						}
+						if !leftSeen && input[i] == ',' {
+							leftSeen = true
+							scannedLen = 0
+							i++
+						}
+						if leftSeen && !rightSeen && input[i] == ')' {
+							rightSeen = true
+							scannedLen = 0
+							i--
+							break
+						}
+
+						if !leftSeen {
+							leftOperand += string(input[i])
+						} else if !rightSeen {
+							rightOperand += string(input[i])
+						}
+						scannedLen++
+					}
+
+				}
+			case ')':
+				if tokenBuilder == "mul(" && leftSeen && rightSeen {
+					// commit the operation to result
+					leftInt, _ := strconv.Atoi(leftOperand)
+					rightInt, _ := strconv.Atoi(rightOperand)
+					if enabled {
+						result += leftInt * rightInt
+					}
+
+					// reset
+					tokenBuilder = ""
+					leftOperand = ""
+					leftSeen = false
+					rightOperand = ""
+					rightSeen = false
+				}
+			default:
+				tokenBuilder = ""
+				leftOperand = ""
+				leftSeen = false
+				rightOperand = ""
+				rightSeen = false
+			}
+		}
+
+		return result
 	}
 
 	for i := 0; i < len(input); i++ {
